@@ -7,7 +7,7 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @Builder
-@EqualsAndHashCode//继承父类 equals 和 hashCode 方法
+@EqualsAndHashCode(callSuper = true)//继承父类 equals 和 hashCode 方法
 public class PartnerVO extends Partner {
     private Integer nodeCount;
 }

@@ -62,10 +62,10 @@
       <el-table-column label="序号" type="index" align="center" prop="id" width="50" />
       <el-table-column label="区域名称" align="center" prop="regionName" />
       <el-table-column label="投放点位数" align="center" prop="nodeCount" />
-      <el-table-column label="备注" align="center" prop="remark" />
+      <el-table-column label="备注" align="center" prop="remark" show-overflow-tooltip/>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
-          <el-button link type="primary" icon="Link" @click="getPartnerInfo(scope.row)" v-hasPermi="['manage:partner:query']">信息标签</el-button>
+          <el-button link type="primary" icon="Link" @click="getRegionInfo(scope.row)" v-hasPermi="['manage:partner:list']">区域详情</el-button>
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['manage:region:edit']">修改</el-button>
           <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['manage:region:remove']">删除</el-button>
         </template>
@@ -97,17 +97,36 @@
         </div>
       </template>
     </el-dialog>
+
+
+    <!-- 显示区域详情对话框 -->
+    <el-dialog :title="title" v-model="RegionOpen" width="550px" append-to-body>
+      <!--      区域信息-->
+      <el-form-item label="区域名称：" prop="regionName" >
+        <el-input v-model="form.regionName" placeholder="请输入区域名称" disabled/>
+      </el-form-item>
+      <!--      点位列表-->
+      <label>包含点位：</label>
+      <el-table :data="nodeList">
+        <el-table-column label="序号" align="center" type="index"  prop="id" width="50"/>
+        <el-table-column label="点位名称" align="center" prop="nodeName" />
+        <el-table-column label="设备数量" align="center" prop="vmCount" />
+      </el-table>
+    </el-dialog>
+
+
   </div>
 </template>
 
 <script setup name="Region">
 import { listRegion, getRegion, delRegion, addRegion, updateRegion } from "@/api/manage/region";
+import { listNode } from "@/api/manage/node";
+import { allListPageInfo } from "@/api/page.js";
 
 const { proxy } = getCurrentInstance();
-
 const regionList = ref([]);
 const open = ref(false);//添加、更新合作商管理
-const PartnerInfoOpen = ref(false);//查看合作商详细信息
+const RegionOpen = ref(false);//查看合作商详细信息
 const loading = ref(true);
 const showSearch = ref(true);
 const ids = ref([]);
@@ -115,7 +134,6 @@ const single = ref(true);
 const multiple = ref(true);
 const total = ref(0);
 const title = ref("");
-
 const data = reactive({
   form: {},
   queryParams: {
@@ -202,15 +220,23 @@ function handleUpdate(row) {
   });
 }
 
-/** 显示详情按钮操作 */
-function getPartnerInfo(row) {
+/** 显示区域详情按钮操作 */
+//响应查询结果（简单类型）
+const nodeList = ref([]);
+function getRegionInfo(row) {
   reset();
   const _id = row.id
+  // 获取点位信息
+  allListPageInfo.regionId = _id;
+  listNode(allListPageInfo).then(response => {
+    nodeList.value = response.rows;
+  });
+  // 获取区域信息
   getRegion(_id).then(response => {
     form.value = response.data;
-    PartnerInfoOpen.value=true;
-    title.value = "信息标签";
   });
+  RegionOpen.value=true;
+  title.value = "区域详情";
 }
 
 /** 提交按钮 */

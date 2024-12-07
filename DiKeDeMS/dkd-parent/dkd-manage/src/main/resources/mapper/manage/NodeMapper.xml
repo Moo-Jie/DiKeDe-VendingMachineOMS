@@ -17,6 +17,24 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="updateBy"    column="update_by"    />
         <result property="remark"    column="remark"    />
     </resultMap>
+<!--region和partner数据量大，使用嵌套查询-->
+    <resultMap type="NodeVO" id="NodeVOResult">
+        <result property="id"    column="id"    />
+        <result property="nodeName"    column="node_name"    />
+        <result property="address"    column="address"    />
+        <result property="businessType"    column="business_type"    />
+        <result property="regionId"    column="region_id"    />
+        <result property="partnerId"    column="partner_id"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="remark"    column="remark"    />
+        <result property="vmCount" column="vm_count"  />
+<!--        查询点位和区域信息封装给region和partner-->
+        <association property="region" javaType="Region" column="region_id" select="com.dkd.manage.mapper.RegionMapper.selectRegionById"  />
+        <association property="partner" javaType="Partner" column="partner_id" select="com.dkd.manage.mapper.PartnerMapper.selectPartnerById"  />
+    </resultMap>
 
     <sql id="selectNodeVo">
         select id, node_name, address, business_type, region_id, partner_id, create_time, update_time, create_by, update_by, remark from tb_node
@@ -26,8 +44,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <include refid="selectNodeVo"/>
         <where>  
             <if test="nodeName != null  and nodeName != ''"> and node_name like concat('%', #{nodeName}, '%')</if>
+            <if test="address != null  and address != ''"> and address like concat('%', #{address}, '%')</if>
+            <if test="businessType != null "> and business_type like concat('%', #{businessType}, '%')</if>
             <if test="regionId != null "> and region_id = #{regionId}</if>
             <if test="partnerId != null "> and partner_id = #{partnerId}</if>
+            <if test="updateTime != null "> and update_time = #{updateTime}</if>
         </where>
     </select>
     
@@ -35,7 +56,27 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <include refid="selectNodeVo"/>
         where id = #{id}
     </select>
-        
+
+
+
+<!--  先联合查询出node以及vmCount，再resultMap嵌套查询出与之关联的region和partner  -->
+    <select id="selectNodeVOList" resultMap="NodeVOResult">
+        select n.*, count(vm.id) as vm_Count
+        from tb_node n
+                 left join tb_vending_machine vm on n.id = vm.node_id
+        <where>
+            <if test="nodeName != null  and nodeName != ''"> and node_name like concat('%', #{nodeName}, '%')</if>
+            <if test="address != null  and address != ''"> and address like concat('%', #{address}, '%')</if>
+            <if test="businessType != null "> and n.business_type like concat('%', #{businessType}, '%')</if>
+            <if test="regionId != null "> and n.region_id = #{regionId}</if>
+            <if test="partnerId != null "> and n.partner_id = #{partnerId}</if>
+            <if test="updateTime != null "> and update_time = #{updateTime}</if>
+        </where>
+        group by n.id
+    </select>
+
+
+
     <insert id="insertNode" parameterType="Node" useGeneratedKeys="true" keyProperty="id">
         insert into tb_node
         <trim prefix="(" suffix=")" suffixOverrides=",">

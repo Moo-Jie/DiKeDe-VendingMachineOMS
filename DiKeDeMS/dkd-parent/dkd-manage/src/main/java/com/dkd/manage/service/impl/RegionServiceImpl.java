@@ -1,13 +1,18 @@
 package com.dkd.manage.service.impl;
 
 import java.util.List;
+
+import com.dkd.common.constant.ExceptionConstant;
+import com.dkd.common.exception.base.BaseException;
 import com.dkd.common.utils.DateUtils;
 import com.dkd.manage.domain.Vo.RegionVO;
+import com.dkd.manage.mapper.NodeMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.dkd.manage.mapper.RegionMapper;
 import com.dkd.manage.domain.Region;
 import com.dkd.manage.service.IRegionService;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 区域管理Service业务层处理
@@ -15,12 +20,15 @@ import com.dkd.manage.service.IRegionService;
  * @author RichDu
  * @date 2024-11-28
  */
+@Transactional
 @Service
 public class RegionServiceImpl implements IRegionService 
 {
     @Autowired
     private RegionMapper regionMapper;
 
+    @Autowired
+    private NodeMapper nodeMapper;
     /**
      * 查询区域管理
      * 
@@ -80,6 +88,11 @@ public class RegionServiceImpl implements IRegionService
     @Override
     public int deleteRegionByIds(Long[] ids)
     {
+        //判断该区域是否被使用
+        for (Long id : ids) {
+            if(nodeMapper.selectNodeByRegionId(id)>0)
+                throw new BaseException(ExceptionConstant.REGION_HAS_NODE);
+        }
         return regionMapper.deleteRegionByIds(ids);
     }
 
@@ -92,6 +105,9 @@ public class RegionServiceImpl implements IRegionService
     @Override
     public int deleteRegionById(Long id)
     {
+        //判断该区域是否被使用
+        if(nodeMapper.selectNodeByRegionId(id)>0)
+            throw new BaseException(ExceptionConstant.REGION_HAS_NODE);
         return regionMapper.deleteRegionById(id);
     }
 

@@ -2,6 +2,8 @@ package com.dkd.manage.controller;
 
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
+
+import com.dkd.manage.domain.Vo.NodeVO;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,7 +27,7 @@ import com.dkd.common.core.page.TableDataInfo;
  * 点位管理Controller
  * 
  * @author RichDu
- * @date 2024-11-28
+ * @date 2024-12-02
  */
 @RestController
 @RequestMapping("/manage/node")
@@ -42,9 +44,12 @@ public class NodeController extends BaseController
     public TableDataInfo list(Node node)
     {
         startPage();
-        List<Node> list = nodeService.selectNodeList(node);
+        List<NodeVO> list = nodeService.selectNodeVOList(node);
         return getDataTable(list);
     }
+    /**
+     * 查询点位管理列表
+     */
 
     /**
      * 导出点位管理列表

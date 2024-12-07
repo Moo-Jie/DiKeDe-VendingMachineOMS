@@ -3,6 +3,7 @@ package com.dkd.manage.mapper;
 import java.util.List;
 import com.dkd.manage.domain.Partner;
 import com.dkd.manage.domain.Vo.PartnerVO;
+import org.apache.ibatis.annotations.Mapper;
 
 /**
  * 合作商管理Mapper接口
@@ -10,6 +11,7 @@ import com.dkd.manage.domain.Vo.PartnerVO;
  * @author RichDu
  * @date 2024-11-28
  */
+@Mapper
 public interface PartnerMapper 
 {
     /**

@@ -103,7 +103,7 @@
         <el-form-item label="分成比例" prop="profitRatio">
           <el-input v-model="form.profitRatio" placeholder="请输入分成比例" />
         </el-form-item>
-        <el-form-item label="创建时间" prop="profitRatio" v-if="form.id!=null">
+        <el-form-item label="信息创建时间" prop="profitRatio" v-if="form.id!=null">
           {{form.createTime}}
         </el-form-item>
         <el-form-item label="账号" prop="account" v-if="form.id==null">

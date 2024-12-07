@@ -2,12 +2,13 @@ package com.dkd.manage.service;
 
 import java.util.List;
 import com.dkd.manage.domain.Node;
+import com.dkd.manage.domain.Vo.NodeVO;
 
 /**
  * 点位管理Service接口
  * 
  * @author RichDu
- * @date 2024-11-28
+ * @date 2024-12-02
  */
 public interface INodeService 
 {
@@ -58,4 +59,12 @@ public interface INodeService
      * @return 结果
      */
     public int deleteNodeById(Long id);
+
+    /**
+     * 查询点位管理列表
+     *
+     * @param node 点位管理
+     * @return 点位管理集合
+     */
+    public List<NodeVO> selectNodeVOList(Node node);
 }

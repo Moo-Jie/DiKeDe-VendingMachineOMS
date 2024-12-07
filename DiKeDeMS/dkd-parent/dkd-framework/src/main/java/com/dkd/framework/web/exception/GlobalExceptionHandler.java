@@ -3,6 +3,7 @@ package com.dkd.framework.web.exception;
 import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.BindException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -16,6 +17,8 @@ import com.dkd.common.core.domain.AjaxResult;
 import com.dkd.common.exception.DemoModeException;
 import com.dkd.common.exception.ServiceException;
 import com.dkd.common.utils.StringUtils;
+
+import java.util.Objects;
 
 /**
  * 全局异常处理器
@@ -135,4 +138,5 @@ public class GlobalExceptionHandler
     {
         return AjaxResult.error("演示模式，不允许操作");
     }
+
 }

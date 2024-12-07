@@ -2,18 +2,21 @@ package com.dkd.manage.service.impl;
 
 import java.util.List;
 import com.dkd.common.utils.DateUtils;
+import com.dkd.manage.domain.Vo.NodeVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.dkd.manage.mapper.NodeMapper;
 import com.dkd.manage.domain.Node;
 import com.dkd.manage.service.INodeService;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 点位管理Service业务层处理
  * 
  * @author RichDu
- * @date 2024-11-28
+ * @date 2024-12-02
  */
+@Transactional
 @Service
 public class NodeServiceImpl implements INodeService 
 {
@@ -80,6 +83,18 @@ public class NodeServiceImpl implements INodeService
     public int deleteNodeByIds(Long[] ids)
     {
         return nodeMapper.deleteNodeByIds(ids);
+    }
+
+    /**
+     * 查询点位管理列表
+     *
+     * @param node 点位管理
+     * @return 点位管理
+     */
+    @Override
+    public List<NodeVO> selectNodeVOList(Node node)
+    {
+        return nodeMapper.selectNodeVOList(node);
     }
 
     /**

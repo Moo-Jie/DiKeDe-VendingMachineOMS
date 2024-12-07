@@ -1,4 +1,4 @@
-export const loadAllParams = reactive({
+export const allListPageInfo = reactive({
   pageNum: 1,
   pageSize: 10000,
 });
