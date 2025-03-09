@@ -1,2 +1,0 @@
-# DiKeDe-VendingMachineOMS
-DiKeDe-VendingMachineOMS
