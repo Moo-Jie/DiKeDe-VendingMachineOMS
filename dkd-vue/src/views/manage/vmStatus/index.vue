@@ -40,7 +40,9 @@
       </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
-          <el-button link type="primary"  @click="getVmInfo(scope.row)" v-hasPermi="['manage:vm:query']">查看详情</el-button>
+          <el-button link type="primary" @click="getVmInfo(scope.row)" v-hasPermi="['manage:vm:query']">查看详情</el-button>
+          <el-button link type="warning" @click="handleVmStatusChange(scope.row)" v-hasPermi="['manage:vm:edit']">运营状态</el-button>
+          <el-button link type="danger" @click="handleRunningStatusChange(scope.row)" v-hasPermi="['manage:vm:edit']">设备状态</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -87,6 +89,43 @@
         </div>
       </template>
     </el-dialog>
+
+    <!-- 运营状态修改对话框 -->
+    <el-dialog title="修改运营状态" v-model="vmStatusOpen" width="500px" append-to-body>
+      <el-form :model="vmStatusForm" ref="vmStatusRef" label-width="80px">
+        <el-form-item label="新状态" prop="status" :rules="[{ required: true, message: '请选择状态', trigger: 'change' }]">
+          <el-select v-model="vmStatusForm.status" placeholder="请选择状态">
+            <el-option label="运营" :value="1" />
+            <el-option label="未投放" :value="0" />
+            <el-option label="撤机" :value="3" />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="vmStatusOpen = false">取 消</el-button>
+          <el-button type="primary" @click="submitVmStatus">确 定</el-button>
+        </div>
+      </template>
+    </el-dialog>
+
+    <!-- 运行状态修改对话框 -->
+    <el-dialog title="修改运行状态" v-model="runningStatusOpen" width="500px" append-to-body>
+      <el-form :model="runningStatusForm" ref="runningStatusRef" label-width="80px">
+        <el-form-item label="新状态" prop="status" :rules="[{ required: true, message: '请选择状态', trigger: 'change' }]">
+          <el-select v-model="runningStatusForm.status" placeholder="请选择状态">
+            <el-option label="正常" :value="1" />
+            <el-option label="异常" :value="0" />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="runningStatusOpen = false">取 消</el-button>
+          <el-button type="primary" @click="submitRunningStatus">确 定</el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -98,10 +137,17 @@ import{loadAllParams} from "@/api/page";
 import{listNode} from "@/api/manage/node";
 import{listRegion} from "@/api/manage/region";
 import { ref } from "vue";
-
+const vmStatusOpen = ref(false);
+const runningStatusOpen = ref(false);
+const vmStatusForm = ref({ id: null, status: null });
+const runningStatusForm = ref({ id: null, status: null });
 const { proxy } = getCurrentInstance();
 const { vm_status } = proxy.useDict('vm_status');
-
+const statusOpen = ref(false);
+const statusForm = ref({
+  id: null,
+  status: null
+});
 const vmList = ref([]);
 const open = ref(false);
 const loading = ref(true);
@@ -138,6 +184,30 @@ const data = reactive({
 });
 
 const { queryParams, form, rules } = toRefs(data);
+
+// 状态修改处理函数
+function handleStatusChange(row) {
+  statusForm.value = {
+    id: row.id,
+    status: row.vmStatus
+  };
+  statusOpen.value = true;
+}
+
+// 提交状态修改
+function submitStatus() {
+  proxy.$refs.statusRef.validate(valid => {
+    if (valid) {
+      updateVm(statusForm.value).then(response => {
+        proxy.$modal.msgSuccess("状态修改成功");
+        statusOpen.value = false;
+        getList(); // 刷新列表
+      }).catch(() => {
+        proxy.$modal.msgError("状态修改失败");
+      });
+    }
+  });
+}
 
 /** 查询设备管理列表 */
 function getList() {
@@ -285,6 +355,47 @@ const regionList=ref([]);
 function getRegionList() {
   listRegion(loadAllParams).then(response => {
     regionList.value = response.rows;
+  });
+}
+
+function handleVmStatusChange(row) {
+  vmStatusForm.value = { id: row.id, status: row.vmStatus };
+  vmStatusOpen.value = true;
+}
+
+function handleRunningStatusChange(row) {
+  const currentStatus = row.runningStatus ? JSON.parse(row.runningStatus).status : false;
+  runningStatusForm.value = { id: row.id, status: currentStatus };
+  runningStatusOpen.value = true;
+}
+
+function submitVmStatus() {
+  proxy.$refs.vmStatusRef.validate(valid => {
+    if (valid) {
+      updateVm({ id: vmStatusForm.value.id, vmStatus: vmStatusForm.value.status })
+          .then(() => {
+            proxy.$modal.msgSuccess("运营状态更新成功");
+            vmStatusOpen.value = false;
+            getList();
+          })
+          .catch(() => proxy.$modal.msgError("更新失败"));
+    }
+  });
+}
+
+function submitRunningStatus() {
+  proxy.$refs.runningStatusRef.validate(valid => {
+    if (valid) {
+      const statusData = { status: runningStatusForm.value.status };
+      updateVm({
+        id: runningStatusForm.value.id,
+        runningStatus: JSON.stringify(statusData)
+      }).then(() => {
+        proxy.$modal.msgSuccess("运行状态更新成功");
+        runningStatusOpen.value = false;
+        getList();
+      }).catch(() => proxy.$modal.msgError("更新失败"));
+    }
   });
 }
 

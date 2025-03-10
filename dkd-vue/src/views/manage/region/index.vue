@@ -9,6 +9,14 @@
           @keyup.enter="handleQuery"
         />
       </el-form-item>
+      <el-form-item label="备注说明" prop="remark">
+        <el-input
+            v-model="queryParams.remark"
+            placeholder="请输入备注内容"
+            clearable
+            @keyup.enter="handleQuery"
+        />
+      </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
         <el-button icon="Refresh" @click="resetQuery">重置</el-button>
@@ -100,10 +108,16 @@
 
     <!-- 查看详情对话框 -->
      <el-dialog title="区域详情" v-model="regionInfoOpen" width="500px" append-to-body>
-      <el-form-item label="区域名称" prop="regionName">
-          <el-input v-model="form.regionName" placeholder="请输入区域名称" disabled />
-        </el-form-item>
-        <label>包含点位：</label>
+       <el-form-item label="区域名称" prop="regionName">
+         <el-input v-model="form.regionName" placeholder="请输入区域名称" disabled />
+       </el-form-item>
+       <el-form-item label="创建时间" prop="createTime">
+         <el-input v-model="form.createTime" disabled />
+       </el-form-item>
+       <el-form-item label="更新时间" prop="updateTime">
+         <el-input v-model="form.updateTime" disabled />
+       </el-form-item>
+       <label>包含点位：</label>
     <el-table :data="nodeList" >
       <el-table-column label="序号" type="index" width="50" align="center" prop="id" />
       <el-table-column label="点位名称" align="center" prop="nodeName" />

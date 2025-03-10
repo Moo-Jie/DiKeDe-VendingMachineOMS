@@ -62,7 +62,7 @@
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="工单方式：">
+          <el-form-item label="完成方式：">
             {{ taskDada.createType === 0 ? '自动' : '手动' }}
           </el-form-item>
         </el-col>

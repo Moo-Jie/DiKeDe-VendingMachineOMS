@@ -10,7 +10,7 @@
 
     <name>dkd-parent</name>
     <url>http://www.ruoyi.vip</url>
-    <description>帝可得管理系统</description>
+    <description>RICH-帝可得管理系统</description>
 
     <properties>
         <dkd.version>3.8.7</dkd.version>

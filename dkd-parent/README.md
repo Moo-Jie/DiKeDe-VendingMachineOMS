@@ -6,6 +6,8 @@
 <h1 align="center" style="margin: 30px 0 30px; font-weight: bold;">帝可得</h1>
 <h4 align="center">基于RuoYi（SpringBoot+Vue前后端分离）的Java快速开发框架</h4>
 
+## 开发日志
+待完成：定时任务处理超时工单，并设定工单完成方式为自动
 
 ## 背景介绍
 

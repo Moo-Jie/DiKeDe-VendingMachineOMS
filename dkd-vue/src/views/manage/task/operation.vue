@@ -88,7 +88,7 @@
         align="center"
         prop="taskType.typeName"
       />
-      <el-table-column label="工单方式" align="center" prop="createType">
+      <el-table-column label="完成方式" align="center" prop="createType">
         <template #default="scope">
           <dict-tag :options="task_create_type" :value="scope.row.createType" />
         </template>
@@ -124,6 +124,11 @@
             v-hasPermi="['manage:task:edit']"
             >查看详情</el-button
           >
+          <el-button
+              link type="warning"
+              @click="handleStatusChange(scope.row)"
+              v-hasPermi="['manage:task:edit']"
+          >修改状态</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -136,6 +141,26 @@
       @pagination="getList"
     />
 
+    <!-- 工单状态修改对话框 -->
+    <el-dialog title="修改工单状态" v-model="statusOpen" width="500px" append-to-body>
+      <el-form :model="statusForm" ref="statusRef" label-width="100px">
+        <el-form-item label="新状态" prop="status"
+                      :rules="[{ required: true, message: '请选择状态', trigger: 'change' }]">
+          <el-select v-model="statusForm.status" placeholder="请选择状态">
+            <el-option label="待处理" :value="1" />
+            <el-option label="进行中" :value="2" />
+            <el-option label="取消" :value="3" />
+            <el-option label="完成" :value="4" />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="statusOpen = false">取 消</el-button>
+          <el-button type="primary" @click="submitStatus">确 定</el-button>
+        </div>
+      </template>
+    </el-dialog>
     <!-- 添加工单对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
       <el-form ref="taskRef" :model="form" :rules="rules" label-width="100px">
@@ -230,10 +255,16 @@ const single = ref(true);
 const multiple = ref(true);
 const total = ref(0);
 const title = ref('');
+const statusOpen = ref(false);
+const statusForm = ref({
+  taskId: null,
+  status: null
+});
 const detailVisible = ref(false); //查看详情弹层显示/隐藏
 const taskId = ref(''); //工单id
 const taskDada = ref({}); //工单详情
 const userList = ref([]); //运维人员
+
 const data = reactive({
   form: {},
   queryParams: {
@@ -243,7 +274,6 @@ const data = reactive({
     taskStatus: null,
     createType: null,
     innerCode: null,
-    userId: null,
     userName: null,
     regionId: null,
     desc: null,
@@ -294,7 +324,6 @@ function reset() {
     taskStatus: null,
     createType: null,
     innerCode: null,
-    userId: null,
     userName: null,
     regionId: null,
     desc: null,
@@ -422,6 +451,49 @@ const openTaskDetailDialog = (row) => {
 const handleClose = () => {
   detailVisible.value = false;
 };
+
+function handleStatusChange(row) {
+  // 前置状态校验
+  if ([3, 4].includes(row.taskStatus)) {
+    proxy.$modal.msgError("已完成或取消的订单不可再更改状态！");
+    return;
+  }
+
+  statusForm.value = {
+    taskId: row.taskId,
+    status: row.taskStatus
+  };
+  statusOpen.value = true;
+}
+
+function performStatusUpdate() {
+  updateTask({
+    taskId: statusForm.value.taskId,
+    taskStatus: statusForm.value.status,
+    createType: 1
+  }).then(() => {
+    proxy.$modal.msgSuccess("状态更新成功，完成方式改为手动");
+    statusOpen.value = false;
+    getList();
+  }).catch(() => {
+    proxy.$modal.msgError("状态更新失败");
+  });
+}
+// 提交状态修改
+function submitStatus() {
+  proxy.$refs.statusRef.validate(valid => {
+    if (valid) {
+      // 完成状态确认提示
+      if (statusForm.value.status === 4) {
+        proxy.$modal.confirm('请确保订单已经完成，后期会进行核对！').then(() => {
+          performStatusUpdate();
+        }).catch(() => {});
+      } else {
+        performStatusUpdate();
+      }
+    }
+  });
+}
 getTaskTypeList();
 
 getList();
