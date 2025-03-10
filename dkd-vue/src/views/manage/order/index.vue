@@ -43,7 +43,7 @@
       </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
-          <el-button link type="primary"  @click="handleUpdate(scope.row)" v-hasPermi="['manage:order:edit']">查看详情</el-button>
+          <el-button link type="primary"  @click="getOrderInfo(scope.row)" v-hasPermi="['manage:order:edit']">查看详情</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -57,13 +57,27 @@
     />
 
     <!-- 查看详情对话框 -->
-    <el-dialog :title="title" v-model="open" width="500px" append-to-body>
-      <el-form ref="orderRef" :model="form" :rules="rules" label-width="80px">
-      </el-form>
+    <el-dialog :title="title" v-model="open" width="800px" append-to-body>
+      <el-descriptions :column="2" border>
+        <el-descriptions-item label="订单编号">{{ form.orderNo }}</el-descriptions-item>
+        <el-descriptions-item label="商品名称">{{ form.skuName }}</el-descriptions-item>
+        <el-descriptions-item label="订单状态">
+          <dict-tag :options="order_status" :value="form.status"/>
+        </el-descriptions-item>
+        <el-descriptions-item label="订单金额">¥{{ form.amount?.toFixed(2) }}</el-descriptions-item>
+        <el-descriptions-item label="创建时间">
+          {{ parseTime(form.createTime) }}
+        </el-descriptions-item>
+        <el-descriptions-item label="支付时间">
+          {{ form.payTime ? parseTime(form.payTime) : '未支付' }}
+        </el-descriptions-item>
+        <el-descriptions-item label="设备编号">{{ form.innerCode }}</el-descriptions-item>
+        <el-descriptions-item label="用户ID">{{ form.userId }}</el-descriptions-item>
+      </el-descriptions>
+
       <template #footer>
         <div class="dialog-footer">
-          <el-button type="primary" @click="submitForm">确 定</el-button>
-          <el-button @click="cancel">取 消</el-button>
+          <el-button @click="open = false">关 闭</el-button>
         </div>
       </template>
     </el-dialog>
@@ -136,13 +150,11 @@ function resetQuery() {
 
 
 /** 查看详情操作 */
-function handleUpdate(row) {
-  const _id = row.id || ids.value
-  getOrder(_id).then(response => {
-    form.value = response.data;
-    open.value = true;
-    title.value = "订单详情";
-  });
+
+function getOrderInfo(row) {
+  form.value = { ...row };  // 直接使用表格行数据
+  open.value = true;
+  title.value = "订单详情";
 }
 
 

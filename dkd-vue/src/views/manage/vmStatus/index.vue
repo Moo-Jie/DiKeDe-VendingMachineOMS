@@ -53,8 +53,39 @@
       @pagination="getList"
     />
 
-    <!-- 添加或修改设备管理对话框 -->
-    <el-dialog :title="title" v-model="open" width="500px" append-to-body>
+    <!-- 查看详情对话框，展示单个数据的详情 -->
+    <el-dialog :title="title" v-model="open" width="800px" append-to-body>
+      <el-descriptions :column="2" border>
+        <el-descriptions-item label="设备编号">{{ form.innerCode }}</el-descriptions-item>
+        <el-descriptions-item label="货道最大容量">{{ form.channelMaxCapacity }}</el-descriptions-item>
+        <el-descriptions-item label="详细地址" :span="2">{{ form.addr }}</el-descriptions-item>
+
+        <el-descriptions-item label="设备型号">
+          <span v-for="item in vmTypeList" :key="item.id">
+            {{ item.id === form.vmTypeId ? item.name : '' }}
+          </span>
+        </el-descriptions-item>
+        <el-descriptions-item label="运营状态">
+          <dict-tag :options="vm_status" :value="form.vmStatus"/>
+        </el-descriptions-item>
+
+        <el-descriptions-item label="运行状态" :span="2">
+          {{ form.runningStatus ? JSON.parse(form.runningStatus).status ? '正常' : '异常' : '未知' }}
+        </el-descriptions-item>
+
+        <el-descriptions-item label="经纬度">
+          {{ form.longitudes }}, {{ form.latitude }}
+        </el-descriptions-item>
+        <el-descriptions-item label="最后补货时间">
+          {{ form.lastSupplyTime }}
+        </el-descriptions-item>
+      </el-descriptions>
+
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="open = false">关 闭</el-button>
+        </div>
+      </template>
     </el-dialog>
   </div>
 </template>
